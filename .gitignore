@@ -1,3 +1,7 @@
 _output/
 _artifacts/
 lima.REJECTED.yaml
+
+.build/
+.switftpm/
+.DS_Store
