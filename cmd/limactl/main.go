@@ -30,6 +30,10 @@ func newApp() *cli.App {
 			Name:  "debug",
 			Usage: "debug mode",
 		},
+		&cli.BoolFlag{
+			Name:  "macvirt",
+			Usage: "Use Mac OS Virtualization framework instead qemu",
+		},
 	}
 	app.Before = func(clicontext *cli.Context) error {
 		if clicontext.Bool("debug") {

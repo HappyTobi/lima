@@ -173,7 +173,16 @@ func startAction(clicontext *cli.Context) error {
 		return err
 	}
 	ctx := clicontext.Context
-	return start.Start(ctx, instName, instDir, y)
+
+	//check virtualization that should be used
+	useMacVirt := false
+	for _, flag := range clicontext.App.Flags {
+		if strings.Contains(flag.Names()[0], "macvirt") && flag.IsSet() {
+			useMacVirt = true
+		}
+	}
+
+	return start.Start(ctx, instName, instDir, y, useMacVirt)
 }
 
 func argSeemsYAMLPath(arg string) bool {
