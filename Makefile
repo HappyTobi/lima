@@ -12,13 +12,22 @@ GO_BUILD := CGO_ENABLED=0 $(GO) build -ldflags="-s -w -X $(PACKAGE)/pkg/version.
 .PHONY: all
 all: binaries
 
+.PHONY: _output/bin/macvirt
+_output/bin/macvirt: 
+	mkdir -p _output/bin/
+	cd tools/macvirt && swift build -c release --disable-sandbox
+	cp tools/macvirt/.build/release/macvirt _output/bin/macvirt
+	codesign -s - --entitlements tools/macvirt/macvirt.entitlements _output/bin/macvirt
+	chmod +x _output/bin/macvirt
+
 .PHONY: binaries
 binaries: \
 	_output/bin/lima \
 	_output/bin/limactl \
 	_output/bin/nerdctl.lima \
 	_output/share/lima/lima-guestagent.Linux-x86_64 \
-	_output/share/lima/lima-guestagent.Linux-aarch64
+	_output/share/lima/lima-guestagent.Linux-aarch64 \
+	_output/bin/macvirt
 
 .PHONY: _output/bin/lima
 _output/bin/lima:
