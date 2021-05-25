@@ -6,8 +6,14 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestDefaultTemplateYAML(t *testing.T) {
-	_, err := Load(DefaultTemplate)
+func TestDefaultTemplateQemuYAML(t *testing.T) {
+	_, err := Load(defaultTemplateQemu)
+	assert.NilError(t, err)
+	// Do not call Validate(y) here, as it fails when `~/lima` is missing
+}
+
+func TestDefaultTemplateMacvirtYAML(t *testing.T) {
+	_, err := Load(defaultTemplateMacVirt)
 	assert.NilError(t, err)
 	// Do not call Validate(y) here, as it fails when `~/lima` is missing
 }

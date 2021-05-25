@@ -20,8 +20,8 @@ import (
 )
 
 var startCommand = &cli.Command{
-	Name:      "start",
-	Usage:     fmt.Sprintf("Start an instance of Lima. If the instance does not exist, open an editor for creating new one, with name %q", DefaultInstanceName),
+	Name: "start",
+	Usage: fmt.Sprintf("Start an instance of Lima. If the instance does not exist, open a	n editor for creating new one, with name %q", DefaultInstanceName),
 	ArgsUsage: "[flags] NAME|FILE.yaml",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
@@ -34,7 +34,7 @@ var startCommand = &cli.Command{
 	BashComplete: startBashComplete,
 }
 
-func loadOrCreateYAML(clicontext *cli.Context) (y *limayaml.LimaYAML, instDir string, err error) {
+func loadOrCreateYAML(clicontext *cli.Context, emuName string) (y *limayaml.LimaYAML, instDir string, err error) {
 	if clicontext.NArg() > 1 {
 		return nil, "", errors.Errorf("too many arguments")
 	}
@@ -44,7 +44,7 @@ func loadOrCreateYAML(clicontext *cli.Context) (y *limayaml.LimaYAML, instDir st
 		arg = DefaultInstanceName
 	}
 
-	yBytes := limayaml.DefaultTemplate
+	yBytes := limayaml.DefaultTemplateForEmulator(emuName)
 	var instName string
 
 	if argSeemsYAMLPath(arg) {
@@ -164,7 +164,15 @@ func openEditor(clicontext *cli.Context, name string, initialContent []byte) ([]
 }
 
 func startAction(clicontext *cli.Context) error {
-	y, instDir, err := loadOrCreateYAML(clicontext)
+	//check virtualization that should be used
+	ctx := clicontext.Context
+	emulator := start.NewQemuEmulator(ctx)
+	if clicontext.Bool("macvirt") {
+		emulator = start.NewMacVirtEmulator(ctx)
+	}
+
+	//time.Sleep(20 * time.Second)
+	y, instDir, err := loadOrCreateYAML(clicontext, emulator.EmulatorName())
 	if err != nil {
 		return err
 	}
@@ -172,17 +180,8 @@ func startAction(clicontext *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	ctx := clicontext.Context
 
-	//check virtualization that should be used
-	useMacVirt := false
-	for _, flag := range clicontext.App.Flags {
-		if strings.Contains(flag.Names()[0], "macvirt") && flag.IsSet() {
-			useMacVirt = true
-		}
-	}
-
-	return start.Start(ctx, instName, instDir, y, useMacVirt)
+	return emulator.Start(instName, instDir, y)
 }
 
 func argSeemsYAMLPath(arg string) bool {

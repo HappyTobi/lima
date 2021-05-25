@@ -39,6 +39,9 @@ func newApp() *cli.App {
 		if clicontext.Bool("debug") {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
+		if clicontext.Bool("macvirt") {
+			logrus.Debug("Use macvirt as virtualization")
+		}
 		if os.Geteuid() == 0 {
 			return errors.New("must not run as the root")
 		}

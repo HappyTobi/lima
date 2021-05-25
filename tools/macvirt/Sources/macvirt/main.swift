@@ -70,6 +70,9 @@ struct Macvirt: ParsableCommand {
     
     @Option(name: .long, help: "Disk path")
     private var diskPath: String
+
+    @Option(name: .long, help: "Cloud-init data path")
+    private var cloudInitDataPath: String
     
     @Option(name: .long, help: "Kernel cmdline arguments")
     private var cmdLineArg: String
@@ -86,6 +89,7 @@ struct Macvirt: ParsableCommand {
         vzBootLoader.commandLine = cmdLineArg
         
         try vzVirtMachineConfig.storageDevices.append(attachDisk(diskPath: diskPath,readOnly: false))
+        try vzVirtMachineConfig.storageDevices.append(attachDisk(diskPath: cloudInitDataPath,readOnly: true))
         
         let vzTradMemoryBallonDevice = VZVirtioTraditionalMemoryBalloonDeviceConfiguration()
         

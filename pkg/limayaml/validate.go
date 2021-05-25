@@ -90,6 +90,9 @@ func ValidateRaw(y LimaYAML) error {
 		return errors.New("field `ssh.localPort` must be < 65535")
 	}
 
+	if y.Emulator == "macvirt" && len(y.Cmdline) == 0 {
+		return errors.New("field `cmdline` must be set")
+	}
 	// y.Firmware.LegacyBIOS is ignored for aarch64, but not a fatal error.
 
 	return nil

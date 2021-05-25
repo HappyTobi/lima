@@ -7,7 +7,8 @@ PACKAGE := github.com/AkihiroSuda/lima
 VERSION=$(shell git describe --match 'v[0-9]*' --dirty='.m' --always --tags)
 VERSION_TRIMMED := $(VERSION:v%=%)
 
-GO_BUILD := CGO_ENABLED=0 $(GO) build -ldflags="-s -w -X $(PACKAGE)/pkg/version.Version=$(VERSION)"
+#GO_BUILD := CGO_ENABLED=0 $(GO) build -ldflags="-s -w -X $(PACKAGE)/pkg/version.Version=$(VERSION)"
+GO_BUILD := CGO_ENABLED=0 $(GO) build -ldflags="-X $(PACKAGE)/pkg/version.Version=$(VERSION)"
 
 .PHONY: all
 all: binaries
@@ -17,7 +18,6 @@ _output/bin/macvirt:
 	mkdir -p _output/bin/
 	cd tools/macvirt && swift build -c release --disable-sandbox
 	cp tools/macvirt/.build/release/macvirt _output/bin/macvirt
-	codesign -s - --entitlements tools/macvirt/macvirt.entitlements _output/bin/macvirt
 	chmod +x _output/bin/macvirt
 
 .PHONY: binaries
@@ -56,6 +56,7 @@ _output/share/lima/lima-guestagent.Linux-aarch64:
 .PHONY: install
 install:
 	cp -av _output/* /usr/local/
+	codesign -s - --entitlements tools/macvirt/macvirt.entitlements /usr/local/bin/macvirt
 	if [ ! -e /usr/local/bin/nerdctl ]; then ln -sf nerdctl.lima /usr/local/bin/nerdctl; fi
 
 .PHONY: clean

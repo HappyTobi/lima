@@ -13,7 +13,7 @@ images:
     arch: "aarch64"
 
   # Download the file from the internet when the local file is missing.
-  - location: "https://cloud-images.ubuntu.com/hirsute/current/hirsute-server-cloudimg-amd64.img"
+  - location: "https://cloud-images.ubuntu.com/releases/hirsute/release/ubuntu-21.04-server-cloudimg-amd64.img"
     arch: "x86_64"
   - location: "https://cloud-images.ubuntu.com/hirsute/current/hirsute-server-cloudimg-arm64.img"
     arch: "aarch64"

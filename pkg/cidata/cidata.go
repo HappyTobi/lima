@@ -96,7 +96,8 @@ func GuestAgentBinaryPath(arch string) (string, error) {
 	}
 
 	// self:  /usr/local/bin/limactl
-	selfDir := filepath.Dir(self)
+	//selfDir := filepath.Dir(self)
+	selfDir := filepath.Dir("/Users/tobi/Documents/develop/opensource/go/src/github.com/happytobi/lima/_output/bin/")
 	selfDirDir := filepath.Dir(selfDir)
 	candidates := []string{
 		// candidate 0:

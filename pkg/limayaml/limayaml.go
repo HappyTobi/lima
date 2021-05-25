@@ -9,6 +9,7 @@ type LimaYAML struct {
 	Mounts   []Mount  `yaml:"mounts,omitempty"`
 	SSH      SSH      `yaml:"ssh,omitempty"` // REQUIRED (FIXME)
 	Firmware Firmware `yaml:"firmware,omitempty"`
+	Cmdline  string   `yaml:"cmdline,omitempty"`
 }
 
 type Arch = string
@@ -21,8 +22,8 @@ const (
 type Image struct {
 	Location string `yaml:"location"` // REQUIRED
 	Arch     string `yaml:"arch,omitempty"`
+	Name     string `yaml:"name,omitempty"`
 }
-
 type Mount struct {
 	Location string `yaml:"location"` // REQUIRED
 	Writable bool   `yaml:"writable,omitempty"`
