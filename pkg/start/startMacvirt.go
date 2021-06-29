@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/AkihiroSuda/lima/pkg/cidata"
 	"github.com/AkihiroSuda/lima/pkg/hostagent"
@@ -27,6 +28,9 @@ func NewMacVirtEmulator(ctx context.Context) Emulator {
 }
 
 func (e *macvirtEmulator) Start(instName string, instDir string, y *limayaml.LimaYAML) error {
+	//add emulator to yml.
+	y.Emulator = e.name
+
 	cidataISO, err := cidata.GenerateISO9660(instName, y)
 	if err != nil {
 		return err
@@ -35,15 +39,24 @@ func (e *macvirtEmulator) Start(instName string, instDir string, y *limayaml.Lim
 		return err
 	}
 
+	//check state configuration for macvirt
+	state, err := macvirt.LoadVmState(filepath.Join(instDir, macvirt.SateFileName))
+	if err != nil {
+		return err
+	}
+
 	//use macvirt
 	mvCfg := macvirt.Config{
 		Name:        instName,
 		InstanceDir: instDir,
 		LimaYAML:    y,
+		VmState:     state,
 	}
+
 	if err := macvirt.EnsureDisk(mvCfg); err != nil {
 		return err
 	}
+
 	exe, macvirtArgs, err := macvirt.Cmdline(mvCfg)
 	logrus.Debugf("Arguments: %s", strings.Join(macvirtArgs, " "))
 	if err != nil {
@@ -57,19 +70,40 @@ func (e *macvirtEmulator) Start(instName string, instDir string, y *limayaml.Lim
 	if err := mvirtCmd.Start(); err != nil {
 		return err
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	var ip string
+	for {
+		ip, _ = macvirt.FetchIpAddress(mvCfg.VmState.MacAddress)
+		if len(ip) > 0 {
+			break
+		}
+		if ctx.Err() != nil {
+			return err
+		}
+		time.Sleep(1 * time.Second)
+	}
+	mvCfg.VmState.IpAddress = ip
+
+	if ok := macvirt.UpdateVmState(mvCfg.VmState, filepath.Join(instDir, macvirt.SateFileName)); ok != nil {
+		logrus.WithError(err).Warn(("Could not save vm state file"))
+	}
+
 	defer func() {
 		_ = mvirtCmd.Process.Kill()
 	}()
 
+	//get ip adress to use
 	sshFixCmd := exec.Command("ssh-keygen",
-		"-R", fmt.Sprintf("[127.0.0.1]:%d", y.SSH.LocalPort),
-		"-R", fmt.Sprintf("[localhost]:%d", y.SSH.LocalPort),
+		"-R", fmt.Sprintf("[%s]:%d", mvCfg.VmState.IpAddress, y.SSH.LocalPort),
+		"-R", fmt.Sprintf("[%s]:%d", mvCfg.VmState.IpAddress, y.SSH.LocalPort),
 	)
 
 	if out, err := sshFixCmd.CombinedOutput(); err != nil {
 		return errors.Wrapf(err, "failed to run %v: %q", sshFixCmd.Args, string(out))
 	}
-	logrus.Infof("SSH: 127.0.0.1:%d", y.SSH.LocalPort)
+	logrus.Infof("SSH: %s:%d", mvCfg.VmState.IpAddress, y.SSH.LocalPort)
 
 	hAgent, err := hostagent.New(y, instDir)
 	if err != nil {

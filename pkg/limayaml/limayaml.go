@@ -10,6 +10,7 @@ type LimaYAML struct {
 	SSH      SSH      `yaml:"ssh,omitempty"` // REQUIRED (FIXME)
 	Firmware Firmware `yaml:"firmware,omitempty"`
 	Cmdline  string   `yaml:"cmdline,omitempty"`
+	Emulator string   //set lazy
 }
 
 type Arch = string

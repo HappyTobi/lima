@@ -26,6 +26,9 @@ func NewQemuEmulator(ctx context.Context) Emulator {
 }
 
 func (e *qemuEmulator) Start(instName string, instDir string, y *limayaml.LimaYAML) error {
+	//add emulator to yml.
+	y.Emulator = e.name
+
 	cidataISO, err := cidata.GenerateISO9660(instName, y)
 	if err != nil {
 		return err

@@ -16,6 +16,8 @@ users:
 {{range $val := .SSHPubKeys}}
       - {{$val}}
 {{end}}
+    runcmd:
+    - sudo sed -i -e "s/#Port 22/Port 60022/" /etc/ssh/sshd_config
 
 write_files:
  - content: |

@@ -76,6 +76,9 @@ struct Macvirt: ParsableCommand {
     
     @Option(name: .long, help: "Kernel cmdline arguments")
     private var cmdLineArg: String
+
+    @Option(name: .long, help: "MacAddress for Network")
+    private var macAddress: String
     
     @Option(help: "Escape Sequence, when using a tty")
     var escapeSequence: String = "q"
@@ -106,9 +109,11 @@ struct Macvirt: ParsableCommand {
         //Network setup
         let vzVirtNetworkDeviceConfig = VZVirtioNetworkDeviceConfiguration()
         vzVirtNetworkDeviceConfig.attachment = VZNATNetworkDeviceAttachment()
-        let vzMacAdress = VZMACAddress.randomLocallyAdministered()
+        //let vzMacAdress = VZMACAddress.randomLocallyAdministered()
+        let vzMacAdress = VZMACAddress(string: macAddress)!
+        //let vzMacAdress =  VZMACAddress.init(string: macAddress)!
         vzVirtNetworkDeviceConfig.macAddress = vzMacAdress
-        
+
         print("Used MAC Adress to connect to the vm it \(vzMacAdress)")
         
         
