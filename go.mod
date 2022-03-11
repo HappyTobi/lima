@@ -23,7 +23,7 @@ require (
 	github.com/nxadm/tail v1.4.8
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.2.1
+	github.com/spf13/cobra v1.4.0
 	github.com/yalue/native_endian v1.0.1
 	golang.org/x/sys v0.0.0-20210818153620-00dd8d7831e7
 	gopkg.in/yaml.v2 v2.4.0
